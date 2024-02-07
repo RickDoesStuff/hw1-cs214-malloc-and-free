@@ -13,5 +13,5 @@ freelist.o : freelist.c freelist.h
 memgrind.o: memgrind.c
 	$(CC) $(CFLAGS) memgrind.c -o memgrind
 
-memgrid: memgrid.o freelist.o mymalloc.o chunk.o
-	$(CC) $(CFLAGS) memgrid.o freelist.o mymalloc.o chunk.o -o memgrid
+memgrind: memgrind.o freelist.o mymalloc.o chunk.o
+	$(CC) $(CFLAGS) memgrind.o freelist.o mymalloc.o chunk.o -o memgrind
