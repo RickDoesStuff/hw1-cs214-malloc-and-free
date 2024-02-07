@@ -11,7 +11,7 @@ static double memory[MEMLENGTH];
 
 struct __freelist *head = NULL;
 
-void *mymalloc(size_t size, char *file, int line){
+void *mymalloc(size_t size, char *file, int line) {
     printf(size);
     size = ((size + 8 -1) / 8 )* 8;
     printf(size);
