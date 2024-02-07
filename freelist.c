@@ -22,7 +22,7 @@ int pop_list(struct __freelist** dest) {
 
 	// checks if list is empty or pointer is invalid or if 
 	// its free'd(might not need the mmapd/free'd check)
- 	if (dest==NULL || *dest==NULL || (*dest)->payload.mmapd==0) return 0;
+ 	if (dest==NULL || *dest==NULL) return 0;
 
 	struct __freelist* old = dest; // save current head
 	dest = (*dest)->next; // update the head to next element
@@ -36,12 +36,12 @@ int pop_list(struct __freelist** dest) {
 * int payload for head
 * @return void
 */
-void push(int item) {
+void push(double newpayload, struct __freelist *head) {
 	struct __freelist* new = malloc(sizeof(struct __freelist)); // 8 bytes
 
-	if (new == NULL || new->payload == NULL)
+	if (new == NULL)
 		return;
-	new->payload = item;
+//	new->payload = newpayload; error
 	new->next = head;
 	head = new;
 }

@@ -10,8 +10,8 @@ mymalloc.o: mymalloc.c mymalloc.h
 freelist.o : freelist.c freelist.h
 	$(CC) $(CFLAGS) freelist.c -o freelist
 
-memgrid.o:
+memgrid.o: memgrid.c
 	$(CC) $(CFLAGS) memgrid.c -o memgrid
 
-driver: memgrid.o freelist.o mymalloc.o chunk.o
+memgrid: memgrid.o freelist.o mymalloc.o chunk.o
 	$(CC) $(CFLAGS) memgrid.o freelist.o mymalloc.o chunk.o -o memgrid
