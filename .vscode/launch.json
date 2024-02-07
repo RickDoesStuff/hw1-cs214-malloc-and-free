@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/CS214 C Programs/hw1-cs214-malloc-and-free",
-      "program": "c:/CS214 C Programs/hw1-cs214-malloc-and-free/build/Debug/outDebug",
+      "cwd": "c:/CS214CPrograms/hw1-cs214-malloc-and-free",
+      "program": "c:/CS214CPrograms/hw1-cs214-malloc-and-free/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

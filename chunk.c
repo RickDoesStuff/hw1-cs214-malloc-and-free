@@ -5,5 +5,4 @@ typedef struct chunk {
 	// in use chunk
 	double* header;
 	double* payload;
-
 };
