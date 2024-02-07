@@ -1,0 +1,17 @@
+CC = gcc
+CFLAGS = -g -Wall -std=cdd -fsanitize=address 
+
+chunk.o: chunk.c chunk.h
+	$(CC) $(CFLAGS) chunk.c
+	
+mymalloc.o: mymalloc.c mymalloc.h
+	$(CC) $(CFLAGS) mymalloc.c -o mymalloc
+
+freelist.o : freelist.c freelist.h
+	$(CC) $(CFLAGS) freelist.c -o freelist
+
+memgrid.o:
+	$(CC) $(CFLAGS) memgrid.c -o memgrid
+
+driver: memgrid.o freelist.o mymalloc.o chunk.o
+	$(CC) $(CFLAGS) memgrid.o freelist.o mymalloc.o chunk.o -o memgrid
