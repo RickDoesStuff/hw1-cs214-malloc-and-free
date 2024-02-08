@@ -1,6 +1,7 @@
+#ifndef FREELIST_H
+#define FREELIST_H
+
 #include <stdlib.h> // For size_t
-
-
 
 // Structure for the free list
 typedef struct __freelist {
@@ -11,3 +12,4 @@ typedef struct __freelist {
 // Function prototypes
 int pop_list(freelist* dest);
 void push(int item);
+#endif
