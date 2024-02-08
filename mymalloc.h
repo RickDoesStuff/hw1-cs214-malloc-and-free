@@ -1,5 +1,5 @@
-#ifndef _MYMALLOC_H
-#define _MYMALLOC_H
+#ifndef MYMALLOC_H
+#define MYMALLOC_H
 
 #include <stdlib.h>
 
