@@ -1,6 +1,6 @@
 # malloc() and free()
 
-ron and ricky
+Ron Cohen (rc1456) and Enrico Aquino (eja97)
 
 
 A README file containing the name and netID of both partners, your test plan, descriptions

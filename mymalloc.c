@@ -11,10 +11,15 @@ static double memory[MEMLENGTH];
 
 struct __freelist *head = NULL;
 
+<<<<<<< Updated upstream
 void *mymalloc(size_t size, char *file, int line){
     printf(size);
+=======
+void *mymalloc(size_t size, char *file, int line) {
+    // printf(size);
+>>>>>>> Stashed changes
     size = ((size + 8 -1) / 8 )* 8;
-    printf(size);
+    // printf(size);
     //fullsize=HEADER+size;
     //char *heapstart = (char *) memory;
 

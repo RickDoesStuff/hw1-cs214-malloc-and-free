@@ -5,11 +5,8 @@
 #include "chunk.h"
 #include "freelist.h"
 
-typedef struct __freelist {
-	struct chunk payload; // multiple of 8 bytes
-	struct chunk* next; // pointer is 8 bytes
-};
-// struct 
+// It's possible you may have made your pointers wrong
+// int* x is different from int *x
 
 /**
 * Pop the head
@@ -18,14 +15,18 @@ typedef struct __freelist {
 *
 * @return int success
 */
-int pop_list(struct __freelist** dest) {
+double pop_list(struct __freelist* dest) {
 
 	// checks if list is empty or pointer is invalid or if 
 	// its free'd(might not need the mmapd/free'd check)
+<<<<<<< Updated upstream
  	if (dest==NULL || *dest==NULL || (*dest)->payload.mmapd==0) return 0;
+=======
+ 	if (dest==NULL || dest->next==NULL) return 0;
+>>>>>>> Stashed changes
 
 	struct __freelist* old = dest; // save current head
-	dest = (*dest)->next; // update the head to next element
+	dest = dest->next; // update the head to next element
 	free(old); // free old head
 	return 1; // return sucess
 }
@@ -36,7 +37,11 @@ int pop_list(struct __freelist** dest) {
 * int payload for head
 * @return void
 */
+<<<<<<< Updated upstream
 void push(int item) {
+=======
+void push(double newpayload, struct __freelist* head) {
+>>>>>>> Stashed changes
 	struct __freelist* new = malloc(sizeof(struct __freelist)); // 8 bytes
 
 	if (new == NULL || new->payload == NULL)
@@ -46,6 +51,6 @@ void push(int item) {
 	head = new;
 }
 
-typedef struct size_t {
-	unsigned long long size;
-};
+// typedef struct size_t {
+// 	unsigned long long size;
+// };
