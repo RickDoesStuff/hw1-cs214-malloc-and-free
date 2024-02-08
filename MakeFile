@@ -7,11 +7,8 @@ chunk.o: chunk.c chunk.h
 mymalloc.o: mymalloc.c mymalloc.h
 	$(CC) $(CFLAGS) mymalloc.c -o mymalloc
 
-freelist.o : freelist.c freelist.h
-	$(CC) $(CFLAGS) freelist.c -o freelist
-
 memgrind.o: memgrind.c
 	$(CC) $(CFLAGS) memgrind.c -o memgrind
 
 memgrind: memgrind.o freelist.o mymalloc.o chunk.o
-	$(CC) $(CFLAGS) memgrind.o freelist.o mymalloc.o chunk.o -o memgrind
+	$(CC) $(CFLAGS) memgrind.o mymalloc.o chunk.o -o memgrind
