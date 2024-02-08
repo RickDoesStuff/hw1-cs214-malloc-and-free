@@ -1,3 +1,6 @@
+#ifndef CHUNK_H
+#define CHUNK_H
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -6,3 +9,4 @@ typedef struct chunk {
 	double* header;
 	double* payload;
 };
+#endif
