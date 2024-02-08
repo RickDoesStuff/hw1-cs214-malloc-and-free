@@ -1,14 +1,35 @@
-CC = gcc
-CFLAGS = -g -Wall -std=cdd -fsanitize=address 
+# Define the compiler
+CC=gcc
 
-chunk.o: chunk.c chunk.h
-	$(CC) $(CFLAGS) chunk.c
-	
-mymalloc.o: mymalloc.c mymalloc.h
-	$(CC) $(CFLAGS) mymalloc.c -o mymalloc
+# Compiler flags
+CFLAGS=-Wall -g
 
+# Define the target executable name
+TARGET=memgrind
+
+# List of source files
+SOURCES=chunkhead.c chunk.c mymalloc.c memgrind.c
+
+# Default rule to build the program
+all: $(TARGET)
+
+# Rule for linking the program
+$(TARGET): $(SOURCES:.c=.o)
+	$(CC) $(CFLAGS) -o $@ $^
+
+# Rule for compiling source files
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $<
+
+# Special rule for the driver, which might not have a corresponding header file
 memgrind.o: memgrind.c
-	$(CC) $(CFLAGS) memgrind.c -o memgrind
+	$(CC) $(CFLAGS) -c $<
 
-memgrind: memgrind.o freelist.o mymalloc.o chunk.o
-	$(CC) $(CFLAGS) memgrind.o mymalloc.o chunk.o -o memgrind
+# Rule for cleaning up
+clean:
+	rm -f *.o $(TARGET)
+
+# Dependency rules for object files
+chunkhead.o: chunkhead.h
+chunk.o: chunk.h
+mymalloc.o: mymalloc.h

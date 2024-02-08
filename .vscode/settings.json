@@ -59,6 +59,8 @@
   "files.associations": {
     "stdlib.h": "c",
     "mymalloc.h": "c",
-    "freelist.h": "c"
+    "freelist.h": "c",
+    "chunk.h": "c",
+    "stdio.h": "c"
   }
 }

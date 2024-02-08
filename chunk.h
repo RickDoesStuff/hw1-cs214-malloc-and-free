@@ -3,11 +3,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "chunkhead.h"
 
+/**
+ * header:struct chunkhead
+ * payload:double*
+*/
 typedef struct chunk {
-	// head
-	int size; // 4 bytes
-	int inuse; // 4 bytes (just 1 or 0)
+	struct chunkhead head; // 8 bytes
 	double *payload; // multiple of 8 bytes
-};
+}chunk;
 #endif
