@@ -10,4 +10,4 @@
 typedef struct chunk {
 	struct chunkhead header; // 8 bytes
 	double* payload; // multiple of 8 bytes
-}chunk;
+} chunk;

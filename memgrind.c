@@ -5,9 +5,12 @@
 
 int main(int argc, char **argsv) {
 
-    malloc(3*sizeof(char));
+    malloc(20*sizeof(int));
 
-    printf("\n\n\n------------------------\nnew\n------------------------\n\n");
+    printf("\n------------------------\nnew\n------------------------\n\n");
+    malloc(3*sizeof(double));
+
+    printf("\n------------------------\nnew\n------------------------\n\n");
 
     malloc(15*sizeof(char));
 

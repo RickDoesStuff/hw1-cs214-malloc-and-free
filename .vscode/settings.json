@@ -61,6 +61,8 @@
     "mymalloc.h": "c",
     "freelist.h": "c",
     "chunk.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "chunkhead.h": "c",
+    "string.h": "c"
   }
 }
