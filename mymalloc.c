@@ -32,16 +32,16 @@ static double memory[MEMLENGTH]; //4096 bytes, 512 doubles
 void viewHeap() 
 {
     struct chunkhead *viewcursor = (chunkhead *) HEAP;
-    while(viewcursor < (chunkhead *)(HEAP+(MEMLENGTH*8)-8))
+    while(viewcursor <= (chunkhead *)(HEAP+(MEMLENGTH*8)-8))
     {
         if((viewcursor->size>0 && viewcursor->inuse==0) || viewcursor->inuse == 1)
         {
             printf("\n\n\n");
             printf("---------------------------------\n");
             printf("| address      | %p \t|\n", viewcursor);
-            printf("| TOTAL SIZE   | %i   \t|\n", viewcursor->size+8);
-            printf("| INUSE        | %i   \t\t|\n", viewcursor->inuse);
-            printf("| PAYLOAD SIZE | %i   \t|\n", viewcursor->size);
+            printf("| TOTAL SIZE   | %i      \t|\n", viewcursor->size+8);
+            printf("| INUSE        | %i      \t|\n", viewcursor->inuse);
+            printf("| PAYLOAD SIZE | %i      \t|\n", viewcursor->size);
             printf("------------------------------------\n");
             printf("| ");
 
@@ -57,6 +57,10 @@ void viewHeap()
 
         
             printf(" |\n------------------------------------\n\n");
+        }else
+        if (viewcursor->inuse==0)
+        {
+            printf("\nfree :%p",(viewcursor));
         }
         viewcursor=(chunkhead *) (((char *)viewcursor)+(viewcursor->size+8));
     }
@@ -76,7 +80,6 @@ void __mallocError(char* msg, char *file, int line)
 
 void *mymalloc(size_t size, char *file, int line) 
 {
-    DEBUG LOG("\n\nRequested size:%i\n\n",size);
     //size can never be 0!! 0 size means initalize!
     if (((chunkhead *)HEAP)->size==0 && ((chunkhead *)HEAP)->inuse==0 ) 
     {
@@ -84,9 +87,14 @@ void *mymalloc(size_t size, char *file, int line)
         struct chunk tempchunk={{4096-8,0},NULL};
         struct chunk *metadata = (chunk *)HEAP;
         *metadata = tempchunk; // put meta data at the start of the heap
-        DEBUG LOG("init heap::inuse=%i::size=%i\n",metadata->head.inuse,metadata->head.size);
+        DEBUG LOG("init heap::inuse=%i::size=%i",metadata->head.inuse,metadata->head.size);
         DEBUG viewHeap();
     }
+
+    DEBUG LOG("Requested size:%i\n",size);
+    size = (size+7) & ~7;
+    DEBUG LOG("Changed to size:%i\n\n",size);
+
 
     // Exit Program if size requested is bigger than maximum size
     if(size>(MEMLENGTH*8)-8)
@@ -104,15 +112,6 @@ void *mymalloc(size_t size, char *file, int line)
         // not in use
         DEBUG LOG("address getting scanned:%p\n",cursor);
 
-        // if current chunk is the exact size
-        if (((chunkhead *)cursor)->size==size)
-        {
-            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%i}\n",((chunkhead *)cursor)->size,size);
-            bestFitPointer=cursor;
-            bestFitSize=size;
-            break;
-        }
-
         // if the chunk is currently in use or
         // the current chunk size is smaller than required size
         if (((chunkhead *)cursor)->inuse==1 || ((chunkhead *)cursor)->size<size)
@@ -126,6 +125,14 @@ void *mymalloc(size_t size, char *file, int line)
             continue;
         }
 
+        // if current chunk is the exact size
+        if (((chunkhead *)cursor)->size==size)
+        {
+            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%i}\n",((chunkhead *)cursor)->size,size);
+            bestFitPointer=cursor;
+            bestFitSize=size;
+            break;
+        }
 
         // if current chunk is smaller than bestFitSize
         if ((((chunkhead *)cursor)->size) < bestFitSize)
@@ -138,7 +145,7 @@ void *mymalloc(size_t size, char *file, int line)
             bestFitSize=((chunkhead *)cursor)->size;
 
             
-            DEBUG LOG("cursor+=((chunkhead *)cursor)->size{%p}\n",(cursor+(((chunkhead *)cursor)->size)+8));
+            DEBUG LOG("cursor+8+((chunkhead *)cursor)->size{%p}\n",(cursor+(((chunkhead *)cursor)->size)+8));
             cursor=cursor+8+((chunkhead *)cursor)->size;
             continue;
 
@@ -173,7 +180,7 @@ void *mymalloc(size_t size, char *file, int line)
     DEBUG LOG("Created currentchunk meta data\ninuse{%i}::size{%i}::pointer{%p}\n",
                             currentmetadata->inuse,currentmetadata->size,(char *)currentmetadata);
     DEBUG LOG("CREATED CURRENT CHUNK META DATA\n");
-    DEBUG viewHeap();
+    //DEBUG viewHeap();
     // cursorsize-size+bestpointersize    
     // bestFitPointer+
     // HEAP+distanceintoheap=cursor
@@ -191,30 +198,35 @@ void *mymalloc(size_t size, char *file, int line)
 
     // distanceIntoHeap how big the last chunk was
     // ((size+8)+(size2+8)+(size3+8)...)
-    int distanceIntoHeap = (bestFitPointer-HEAP)+size+8;
-    DEBUG LOG("distanceIntoHeap{%i}\n",distanceIntoHeap);
+    // ex bestFitPointer(100040) - HEAP(100010) + size(payload size) + metadata size(8)
+    int distanceIntoHeap = (bestFitPointer-HEAP)+size+8; 
+    DEBUG LOG("distanceIntoHeap:%i\n",distanceIntoHeap);
 
-    // quick way to calculate the remaining free bytes
-    int sizeOfRemainingFree = 4096 - distanceIntoHeap-8;
-    DEBUG LOG("sizeOfRemainingFree{%i}\n",sizeOfRemainingFree);
+    // quick way to calculate the remaining free bytes in the chunk that was best fit
+    // 4088 - 32
+    // 4056 start of next meta
+    // 4048 start of next free payload
+    // 
+    int amtOfFreeLeftInChunk = bestFitSize - (size + 8);
+    //int sizeOfRemainingFree = 4096 - distanceIntoHeap  - 8;
 
-    struct chunkhead temptrailingchunk={sizeOfRemainingFree,0};
+    DEBUG LOG("amtOfFreeLeftInChunk:%i\n",amtOfFreeLeftInChunk);
+
+    struct chunkhead temptrailingchunk={amtOfFreeLeftInChunk,0};
 
     // we need it to start at the first byte of the new chunk
     struct chunkhead *trailingmetadata = (chunkhead *) (HEAP+distanceIntoHeap);
 
     *trailingmetadata = temptrailingchunk; // put meta data after current chunk / start of next chunk
 
-    DEBUG LOG("trailing metadata::inuse=%i::size=%i::address={%p}\n",
+    DEBUG LOG("trailing metadata::inuse=%i::size=%i::address=%p\n",
                         trailingmetadata->inuse,trailingmetadata->size,(char *)trailingmetadata);
     
-    DEBUG LOG("\n\nTrailing metadata added to heap\n");
-    DEBUG viewHeap();
-
-    DEBUG LOG("HEAP+distanceIntoHeap::inuse=%i::size=%i::address={%p}\n",
+    DEBUG LOG("HEAP+distanceIntoHeap::inuse=%i::size=%i::address=%p\n",
                         ((chunkhead *)HEAP+distanceIntoHeap)->inuse,
                         ((chunkhead *)HEAP+distanceIntoHeap)->size,
                         (char *)(chunkhead *)(HEAP+distanceIntoHeap));
+    DEBUG viewHeap();
 
     return (void *) (bestFitPointer+8);
 
