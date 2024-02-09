@@ -5,7 +5,7 @@ CC=gcc
 CFLAGS=-Wall -g
 
 # Debugging flags
-DFLAGS=-Wall -g -DDEBUG
+DFLAGS=-Wall -g -D__DEBUG
 
 # Define the target executable name
 TARGET=memgrind
