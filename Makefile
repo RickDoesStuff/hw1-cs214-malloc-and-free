@@ -4,6 +4,9 @@ CC=gcc
 # Compiler flags
 CFLAGS=-Wall -g
 
+# Debugging flags
+DFLAGS=-Wall -g -DDEBUG
+
 # Define the target executable name
 TARGET=memgrind
 
@@ -16,26 +19,27 @@ OBJECTS=$(SOURCES:.c=.o)
 # Default rule to build the program
 all: $(TARGET)
 
+# Debug rule to build the program with debug flags
+debug: CFLAGS = $(DFLAGS)
+debug: $(TARGET)
+
 # Rule for linking the program
 $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 # Rule for compiling source files to object files
-# This rule automatically handles .c files without corresponding .h files as well
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c $<
 
 # Special case for memgrind.c which might not need a memgrind.h
-# If memgrind.h exists and is used, remove this rule.
 memgrind.o: memgrind.c
 	$(CC) $(CFLAGS) -c $<
 
 # Rule for cleaning up
 clean:
-	del -f $(OBJECTS) memgrind.exe
+	del -f $(OBJECTS) $(TARGET).exe
 
 # Dependencies
-# Explicitly specify dependencies of .c files on .h files
 chunkhead.o: chunkhead.c chunkhead.h
 chunk.o: chunk.c chunk.h
 mymalloc.o: mymalloc.c mymalloc.h

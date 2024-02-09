@@ -12,9 +12,9 @@
 
 
 
-//#ifndef DEBUG
-#define DEBUG 1
-//#endif
+#ifndef DEBUG
+#define DEBUG 0
+#endif
 
 
 static double memory[MEMLENGTH]; //4096 bytes, 512 doubles
