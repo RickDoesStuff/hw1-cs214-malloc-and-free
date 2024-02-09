@@ -234,5 +234,32 @@ void *mymalloc(size_t size, char *file, int line)
 
 
 void myfree(void *ptr, char *file, int line) {
+    char *cursor = HEAP;
 
+    while(cursor < (HEAP+(MEMLENGTH*8)-8)) 
+    {
+        if(cursor+8 != ptr)
+        {
+            // next chunk
+            cursor=cursor+8+((chunkhead *)cursor)->size;
+            continue;
+        }
+
+        DEBUG LOG ("CHUNK TO FREE FOUND @ %p\n",ptr);
+
+        // create a chunkhead that has the same size payload as before, but set it to free
+        struct chunkhead tempchunkhead={((chunkhead *)cursor)->size,0};
+        // use that tempchunkhead and set the new payload to NULL
+        struct chunk tempchunk={tempchunkhead,NULL};// this is not setting all the payload to NULL in memory, just in the variable, just the first few bytes I think.. I need to check
+
+        // create a chunk pointer to the cursor's position
+        struct chunk *ptempchunk = (chunk *)cursor;
+
+        // overwrite the chunk that had data, with the data from new chunk we just created
+        *ptempchunk = tempchunk; 
+
+        DEBUG LOG("size free'd:%i",tempchunkhead.size);
+        return;
+    }
+    mallocError("FREE ERROR");
 }
