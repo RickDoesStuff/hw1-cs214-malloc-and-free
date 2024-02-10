@@ -106,27 +106,23 @@ void *mymalloc(size_t size, char *file, int line)
     char *cursor = HEAP;
     char *bestFitPointer;
     int bestFitSize=9999;
-
-    while(cursor < (HEAP+(MEMLENGTH*8)-8)) 
+    int countError=0;
+    while(cursor < (HEAP+(MEMLENGTH*8)-8) && countError<5000) 
     {
+        countError+=1;
         // not in use
-        DEBUG LOG("address getting scanned:%p\n",cursor);
-
+        DEBUG LOG("\naddress getting scanned:%p\n",cursor);
+        DEBUG LOG("inuse=%i\t\t",((chunkhead *)cursor)->inuse);
+        DEBUG LOG("size=%i\n",((chunkhead *)cursor)->size);
         // if the chunk is currently in use or
         // the current chunk size is smaller than required size
         if (((chunkhead *)cursor)->inuse==1 || ((chunkhead *)cursor)->size<size)
-        {   
-            DEBUG
-            {
-                LOG("((chunkhead *)cursor)->inuse{%i}==1\t",((chunkhead *)cursor)->inuse);
-                LOG("((chunkhead *)cursor)->size{%i}<size{%i}\n",((chunkhead *)cursor)->size,size);
-            }
-            cursor=cursor+8+((chunkhead *)cursor)->size;
-            continue;
+        {
+            DEBUG LOG("current chunk is in use or smaller\n");
         }
 
         // if current chunk is the exact size
-        if (((chunkhead *)cursor)->size==size)
+        else if (((chunkhead *)cursor)->size==size)
         {
             DEBUG LOG("exact size\t\tcursor->size{%i}==size{%i}\n",((chunkhead *)cursor)->size,size);
             bestFitPointer=cursor;
@@ -135,38 +131,43 @@ void *mymalloc(size_t size, char *file, int line)
         }
 
         // if current chunk is smaller than bestFitSize
-        if ((((chunkhead *)cursor)->size) < bestFitSize)
+        else if ((((chunkhead *)cursor)->size) < bestFitSize)
         {
-            DEBUG LOG("((chunkhead *)cursor)->size{%i}<bestFitSize{%i}\n",((chunkhead *)cursor)->size,bestFitSize);
-            DEBUG LOG("cursor{%p}\n",cursor);
+            DEBUG LOG("cursor size{%i} < bestFitSize{%i}\n",((chunkhead *)cursor)->size,bestFitSize);
             bestFitPointer=cursor;
-
-            DEBUG LOG("((chunkhead *)cursor)->size{%i}\n",((chunkhead *)cursor)->size);
             bestFitSize=((chunkhead *)cursor)->size;
 
-            
             DEBUG LOG("cursor+8+((chunkhead *)cursor)->size{%p}\n",(cursor+(((chunkhead *)cursor)->size)+8));
-            cursor=cursor+8+((chunkhead *)cursor)->size;
-            continue;
-
         }
-
-
-        DEBUG LOG("test\n\n");
-        printf("ERROR, I SHOULDNT BE HERE\tPLEASE FIX\n%p\n",cursor);
-        exit(1);
         cursor=cursor+8+((chunkhead *)cursor)->size;
-
-
-        // increase to the start of the next meta data
+        continue;
     }
-    DEBUG LOG("Exited Search Loop\n");
+    DEBUG LOG("\n\nExited Search Loop\n\n");
+
+    if (countError==5000) {
+        mallocError("countError 5000");
+        return NULL;
+    }
 
     // check if bestFit hasnt been found
     if(bestFitSize == 9999)
     {
         mallocError("Not enough memory. Memory fragmentation.");
         return NULL;
+    }
+
+    
+    // quick way to calculate the remaining free bytes in the chunk that was best fit
+    // 4088 - 32
+    // 4056 start of next meta
+    // 4048 start of next free payload
+    // 
+    
+
+    int amtOfFreeLeftInChunk = bestFitSize - (size) - 8;
+    if (amtOfFreeLeftInChunk==0)
+    {
+        size+=8; // give the user the 8 extra bytes
     }
 
     // we have found best fit or exact fit
@@ -199,18 +200,18 @@ void *mymalloc(size_t size, char *file, int line)
     // distanceIntoHeap how big the last chunk was
     // ((size+8)+(size2+8)+(size3+8)...)
     // ex bestFitPointer(100040) - HEAP(100010) + size(payload size) + metadata size(8)
+
+
+
     int distanceIntoHeap = (bestFitPointer-HEAP)+size+8; 
     DEBUG LOG("distanceIntoHeap:%i\n",distanceIntoHeap);
 
-    // quick way to calculate the remaining free bytes in the chunk that was best fit
-    // 4088 - 32
-    // 4056 start of next meta
-    // 4048 start of next free payload
-    // 
-    int amtOfFreeLeftInChunk = bestFitSize - (size + 8);
-    //int sizeOfRemainingFree = 4096 - distanceIntoHeap  - 8;
-
     DEBUG LOG("amtOfFreeLeftInChunk:%i\n",amtOfFreeLeftInChunk);
+
+    if(amtOfFreeLeftInChunk==0) {
+        DEBUG viewHeap();
+        return (void *) (bestFitPointer+8);
+    }
 
     struct chunkhead temptrailingchunk={amtOfFreeLeftInChunk,0};
 
@@ -226,27 +227,36 @@ void *mymalloc(size_t size, char *file, int line)
                         ((chunkhead *)HEAP+distanceIntoHeap)->inuse,
                         ((chunkhead *)HEAP+distanceIntoHeap)->size,
                         (char *)(chunkhead *)(HEAP+distanceIntoHeap));
-    DEBUG viewHeap();
 
+    DEBUG viewHeap();
     return (void *) (bestFitPointer+8);
 
 }
 
 
 void myfree(void *ptr, char *file, int line) {
-    char *cursor = HEAP;
+    char *cursor = HEAP; 
+    char *prevChunkCursor = HEAP;
 
     while(cursor < (HEAP+(MEMLENGTH*8)-8)) 
     {
         if(cursor+8 != ptr)
         {
+            prevChunkCursor = cursor;
             // next chunk
-            cursor=cursor+8+((chunkhead *)cursor)->size;
+            cursor = cursor+8+((chunkhead *)cursor)->size;
             continue;
         }
 
         DEBUG LOG ("CHUNK TO FREE FOUND @ %p\n",ptr);
 
+
+
+        // if (((chunkhead *)prevChunkCursor)->inuse==0){ // coallese with previous free chunk WIP
+        //     ((chunkhead *)prevChunkCursor)->size=((chunkhead *)cursor)->size+8;
+        // }
+
+        
         // create a chunkhead that has the same size payload as before, but set it to free
         struct chunkhead tempchunkhead={((chunkhead *)cursor)->size,0};
         // use that tempchunkhead and set the new payload to NULL
@@ -259,6 +269,7 @@ void myfree(void *ptr, char *file, int line) {
         *ptempchunk = tempchunk; 
 
         DEBUG LOG("size free'd:%i",tempchunkhead.size);
+        DEBUG viewHeap();
         return;
     }
     mallocError("FREE ERROR");
