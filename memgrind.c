@@ -1,10 +1,8 @@
 #include <stdio.h>
 #include "mymalloc.h"
 
-
-
-int main(int argc, char **argsv) {
-    
+void bookTest(){
+        
     int *parrint = malloc(8*sizeof(int));
 
     parrint[0]=1;
@@ -36,6 +34,44 @@ int main(int argc, char **argsv) {
     int *pnewint=malloc(sizeof(int));
 
 
+    free(parrint);
+    free(pnewddouble);
+}
+
+int main(int argc, char **argsv) {
+    //bookTest();
+    int *piarr[512];
+    for (int i = 0; i<16; i++)
+    {
+        printf("piarr[%i]\n",i);
+        piarr[i] = (int *) malloc(248);
+    }
+    
+    // free invalid memory
+    // printf("\n\nfree[15]+16\n");
+    // free(piarr[15]+16);
+    // test passes
+
+
+    // free'ing already free'd test
+    // int *piarr15=piarr[15];
+    // printf("\n\nfree[15]\n");
+    // free(piarr[15]);
+
+    // printf("\n\nfree[15] again\n");
+    // free(piarr15);
+    // test passes
+
+    // free memory not in heap
+    // int test = 5;
+    // int *ptest = &test;
+    // free(ptest);
+    // test passes
+    // free memory not in heap
+    free(piarr[15]+128); // somethings off here
+    // test fails
+
+
     return 0;
     
 
@@ -44,3 +80,4 @@ int main(int argc, char **argsv) {
 //    }
 
 }
+

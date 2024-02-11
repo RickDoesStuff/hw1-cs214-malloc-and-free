@@ -2,7 +2,7 @@
 CC=gcc
 
 # Compiler flags
-CFLAGS=-Wall -g
+CFLAGS=-Wall -g 
 
 # Debugging flags
 DFLAGS=-Wall -g -D__DEBUG
