@@ -3,6 +3,7 @@
 
 #include "freelist.h"
 #include "chunk.h"
+#include "chunkhead.h"
 
 #define MEMLENGTH 512
 #define HEADER 8
