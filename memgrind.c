@@ -41,10 +41,10 @@ void bookTest(){
 int main(int argc, char **argsv) {
     //bookTest();
     int *piarr[512];
-    for (int i = 0; i<16; i++)
+    for (int i = 0; i<8; i++)
     {
         printf("piarr[%i]\n",i);
-        piarr[i] = (int *) malloc(248);
+        piarr[i] = (int *) malloc(248+256);
     }
     
     // free invalid memory
@@ -54,12 +54,11 @@ int main(int argc, char **argsv) {
 
 
     // free'ing already free'd test
-    // int *piarr15=piarr[15];
-    // printf("\n\nfree[15]\n");
-    // free(piarr[15]);
-
-    // printf("\n\nfree[15] again\n");
-    // free(piarr15);
+    // int *piarr=piarr[1];
+    // printf("\n\nfree[1]\n");
+    // free(piarr[1]);
+    // printf("\n\nfree[1] again\n");
+    // free(piarr15[1]);
     // test passes
 
     // free memory not in heap
@@ -67,9 +66,21 @@ int main(int argc, char **argsv) {
     // int *ptest = &test;
     // free(ptest);
     // test passes
+
     // free memory not in heap
-    free(piarr[15]+128); // somethings off here
+    // free(piarr[15]+128);
     // test fails
+
+    // test free first then the following chunk
+    // free(piarr[0]);
+    // free(piarr[1]);
+    // passes
+
+    // free the 1st, then third, then middle
+    free(piarr[0]);
+    free(piarr[2]);
+    free(piarr[1]);
+    // 
 
 
     return 0;

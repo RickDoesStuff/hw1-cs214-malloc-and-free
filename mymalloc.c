@@ -301,7 +301,7 @@ void myfree(void *ptr, char *file, int line) {
 
             // overwrite the chunkhead that had data, with the free chunk + free chunk meta information
             *ptempchunkhead = tempchunkhead; 
-            DEBUG LOG("size free'd: %i",ptempchunkhead->size);
+            DEBUG LOG("prev chunk not free: size free'd: %i",ptempchunkhead->size);
 
         }
         DEBUG viewHeap();
