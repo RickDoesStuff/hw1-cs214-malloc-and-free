@@ -69,18 +69,40 @@ int main(int argc, char **argsv) {
 
     // free memory not in heap
     // free(piarr[15]+128);
-    // test fails
+    // passes
 
     // test free first then the following chunk
     // free(piarr[0]);
     // free(piarr[1]);
     // passes
 
-    // free the 1st, then third, then middle
-    free(piarr[0]);
-    free(piarr[2]);
-    free(piarr[1]);
-    // 
+    // free 0, 2, then 1
+    // free(piarr[0]);
+    // free(piarr[2]);
+    // free(piarr[1]);
+    // passes
+
+    // free 2, 4, then 3 in the middle of the heap
+    // free(piarr[2]);
+    // free(piarr[4]);
+    // free(piarr[3]);
+    // passes
+
+
+    // free 2, 4, then 3 in the middle of the heap
+    // free(piarr[5]);
+    // free(piarr[7]);
+    // free(piarr[6]);
+    // passes? most times
+
+
+    // free 5, then 6 then 7
+    free(piarr[5]);
+    free(piarr[6]);
+    free(piarr[7]);
+    // passes? most times
+
+
 
 
     return 0;

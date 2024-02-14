@@ -75,7 +75,8 @@ void __mallocError(char* msg, char *file, int line)
     DEBUG viewHeap();
     printf("%s\n",msg);
     printf("Error (%s:%i)", file, line);
-    exit(1);
+    return NULL;
+    //exit(1);
 }
 
 void *mymalloc(size_t size, char *file, int line) 
@@ -91,6 +92,13 @@ void *mymalloc(size_t size, char *file, int line)
         DEBUG viewHeap();
     }
 
+    // Exit Program if no memory is requested
+    if(size==0)
+    {
+        mallocError("To much memory requested!");
+        return NULL; 
+    }
+
     DEBUG LOG("Requested size:%i\n",size);
     size = (size+7) & ~7;
     DEBUG LOG("Changed to size:%i\n\n",size);
@@ -101,7 +109,8 @@ void *mymalloc(size_t size, char *file, int line)
     {
         mallocError("To much memory requested!");
         return NULL; 
-    }
+    }    
+
 
     char *cursor = HEAP;
     char *bestFitPointer;
@@ -243,10 +252,11 @@ void myfree(void *ptr, char *file, int line) {
     char *cursor = HEAP; 
     char *prevChunkCursor = HEAP;
     DEBUG LOG("Looking for chunk: %p\n",(char *)ptr-8);
-    DEBUG LOG("HEAP START: %p\nHEAP END:%p\n",HEAP,HEAP+(MEMLENGTH*8));
+    DEBUG LOG("HEAP START: %p\nHEAP END: %p\n",HEAP,HEAP+(MEMLENGTH*8));
     if ((char *)ptr<HEAP || (char *)ptr>HEAP+(MEMLENGTH*8))
     {
         mallocError("Free pointer not inside of heap!");
+        return NULL;
     }
 
     // search the heap 
@@ -267,18 +277,16 @@ void myfree(void *ptr, char *file, int line) {
 
         if(((chunkhead *)cursor)->inuse==0)
         {
-            mallocError("Free Error: object already free'd: exiting");
+            mallocError("Free Error: object already free'd");
             return;
         }
 
 
-        // coallese with next chunk if it is free as well and putting it into the current chunk
-        // if the next chunk is inside of the heap
-        if (cursor+((chunkhead *) cursor)->size+8 < HEAP+4096) {
-            // get the size of the next chunk's payload
-            int nextChunkSize = ((chunkhead *) cursor)->size;
+        char *nextChunkCursor = cursor + (((chunkhead *) cursor)->size+8);
+        // coallese with next chunk if it is free and next chunk is inside of the heap
+        if (((chunkhead*) nextChunkCursor)->inuse==0 && nextChunkCursor < HEAP+4096) {
             // increase the current chunk's payload by the next chunks payload + the meta data size
-            ((chunkhead *)cursor)->size += nextChunkSize+8;
+            ((chunkhead *)cursor)->size += ((chunkhead *) nextChunkCursor)->size + 8;
             DEBUG LOG("\nCoalescing w/ next chunk\nsize free'd: %i\n",((chunkhead *)cursor)->size);
         }
 
@@ -288,7 +296,7 @@ void myfree(void *ptr, char *file, int line) {
         { 
             // increase the previous chunk's payload by the current chunk's payload + the meta data size
             ((chunkhead *)prevChunkCursor)->size += ((chunkhead *)cursor)->size+8;
-            DEBUG LOG("\nCoalescing w/ prev chunk\nsize free'd: %i\n",((chunkhead *)prevChunkCursor)->size);
+            DEBUG LOG("\nCoalescing w/ previous chunk\nsize free'd: %i\n",((chunkhead *)prevChunkCursor)->size);
 
         } else {
 
@@ -301,7 +309,7 @@ void myfree(void *ptr, char *file, int line) {
 
             // overwrite the chunkhead that had data, with the free chunk + free chunk meta information
             *ptempchunkhead = tempchunkhead; 
-            DEBUG LOG("prev chunk not free: size free'd: %i",ptempchunkhead->size);
+            DEBUG LOG("prev chunk not free, changing current chunk to free and size is: %i\n",ptempchunkhead->size);
 
         }
         DEBUG viewHeap();
@@ -311,7 +319,7 @@ void myfree(void *ptr, char *file, int line) {
     // Unable to locate complete object, the pointer given and none of the pointers to the chunk's payload  are the sam
     DEBUG LOG ("cursor:%p\ninuse:%i\tsize:%i\nprevCursur:%p\ninuse:%i\tsize:%i\n", 
         cursor, ((chunkhead *)cursor)->inuse,((chunkhead *)cursor)->size,prevChunkCursor,((chunkhead *)prevChunkCursor)->inuse,((chunkhead *)prevChunkCursor)->size);
-    mallocError("Free Error: unable to locate complete object: exiting");
+    mallocError("Free Error: unable to locate complete object");
     return;
 
 }
