@@ -75,7 +75,7 @@ void __mallocError(char* msg, char *file, int line)
     DEBUG viewHeap();
     printf("%s\n",msg);
     printf("Error (%s:%i)\n", file, line);
-    return NULL;
+    return;
     //exit(1);
 }
 
@@ -99,9 +99,9 @@ void *mymalloc(size_t size, char *file, int line)
         return NULL; 
     }
 
-    DEBUG LOG("Requested size:%li\n", size);
+    DEBUG LOG("Requested size:%u\n", size);
     size = (size+7) & ~7;
-    DEBUG LOG("Changed to size:%li\n\n", size);
+    DEBUG LOG("Changed to size:%u\n\n", size);
 
 
     // Exit Program if size requested is bigger than maximum size
@@ -133,7 +133,7 @@ void *mymalloc(size_t size, char *file, int line)
         // if current chunk is the exact size
         else if (((chunkhead *)cursor)->size == size)
         {
-            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%li}\n", ((chunkhead *)cursor)->size, size);
+            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%u}\n", ((chunkhead *)cursor)->size, size);
             bestFitPointer = cursor;
             bestFitSize = size;
             break;
@@ -247,7 +247,11 @@ void *mymalloc(size_t size, char *file, int line)
 
 }
 
-
+/**
+ * free()
+ * params: ptr, file, line
+ * return void
+*/
 void myfree(void *ptr, char *file, int line) {
     char *cursor = HEAP; 
     char *prevChunkCursor = HEAP;
@@ -256,7 +260,7 @@ void myfree(void *ptr, char *file, int line) {
     if ((char *)ptr<HEAP || (char *)ptr>HEAP+(MEMLENGTH*8))
     {
         mallocError("Free pointer not inside of heap!");
-        return NULL;
+        return;
     }
 
     // search the heap 
