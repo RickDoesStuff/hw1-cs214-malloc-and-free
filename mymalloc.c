@@ -281,6 +281,7 @@ void myfree(void *ptr, char *file, int line) {
         }
 
 
+        // set the nextChunkCurson as the curson + cursonsize + 8
         char *nextChunkCursor = cursor + (((chunkhead *) cursor)->size+8);
         // coallese with next chunk if it is free and next chunk is inside of the heap
         if (((chunkhead*) nextChunkCursor)->inuse==0 && nextChunkCursor < HEAP+4096) {
