@@ -75,36 +75,37 @@ void __mallocError(char* msg, char *file, int line)
     DEBUG viewHeap();
     printf("%s\n",msg);
     printf("Error (%s:%i)\n", file, line);
+    return NULL;
     //exit(1);
 }
 
 void *mymalloc(size_t size, char *file, int line) 
 {
     //size can never be 0!! 0 size means initalize!
-    if (((chunkhead *)HEAP)->size==0 && ((chunkhead *)HEAP)->inuse==0 ) 
+    if (((chunkhead *)HEAP)->size == 0 && ((chunkhead *)HEAP)->inuse == 0) 
     {
         // init heap
-        struct chunk tempchunk={{4096-8,0},NULL};
+        struct chunk tempchunk={{4096 - 8, 0}, NULL};
         struct chunk *metadata = (chunk *)HEAP;
         *metadata = tempchunk; // put meta data at the start of the heap
-        DEBUG LOG("init heap::inuse=%i::size=%i",metadata->head.inuse,metadata->head.size);
+        DEBUG LOG("init heap::inuse=%i::size=%i", metadata->head.inuse, metadata->head.size);
         DEBUG viewHeap();
     }
 
     // Exit Program if no memory is requested
-    if(size==0)
+    if(size == 0)
     {
         mallocError("To much memory requested!");
         return NULL; 
     }
 
-    DEBUG LOG("Requested size:%i\n",size);
+    DEBUG LOG("Requested size:%li\n", size);
     size = (size+7) & ~7;
-    DEBUG LOG("Changed to size:%i\n\n",size);
+    DEBUG LOG("Changed to size:%li\n\n", size);
 
 
     // Exit Program if size requested is bigger than maximum size
-    if(size>(MEMLENGTH*8)-8)
+    if(size > (MEMLENGTH * 8) - 8)
     {
         mallocError("To much memory requested!");
         return NULL; 
@@ -113,46 +114,46 @@ void *mymalloc(size_t size, char *file, int line)
 
     char *cursor = HEAP;
     char *bestFitPointer;
-    int bestFitSize=9999;
-    int countError=0;
-    while(cursor < (HEAP+(MEMLENGTH*8)-8) && countError<MEMLENGTH*8) 
+    int bestFitSize= 9999;
+    int countError= 0;
+    while(cursor < (HEAP + (MEMLENGTH * 8) - 8) && countError < MEMLENGTH * 8) 
     {
-        countError+=1;
+        countError += 1;
         // not in use
-        DEBUG LOG("\naddress getting scanned:%p\n",cursor);
-        DEBUG LOG("inuse=%i\t\t",((chunkhead *)cursor)->inuse);
-        DEBUG LOG("size=%i\n",((chunkhead *)cursor)->size);
+        DEBUG LOG("\naddress getting scanned:%p\n", cursor);
+        DEBUG LOG("inuse=%i\t\t", ((chunkhead *)cursor)->inuse);
+        DEBUG LOG("size=%i\n", ((chunkhead *)cursor)->size);
         // if the chunk is currently in use or
         // the current chunk size is smaller than required size
-        if (((chunkhead *)cursor)->inuse==1 || ((chunkhead *)cursor)->size<size)
+        if (((chunkhead *)cursor)->inuse == 1 || ((chunkhead *)cursor)->size < size)
         {
             DEBUG LOG("current chunk is in use or smaller\n");
         }
 
         // if current chunk is the exact size
-        else if (((chunkhead *)cursor)->size==size)
+        else if (((chunkhead *)cursor)->size == size)
         {
-            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%i}\n",((chunkhead *)cursor)->size,size);
-            bestFitPointer=cursor;
-            bestFitSize=size;
+            DEBUG LOG("exact size\t\tcursor->size{%i}==size{%li}\n", ((chunkhead *)cursor)->size, size);
+            bestFitPointer = cursor;
+            bestFitSize = size;
             break;
         }
 
         // if current chunk is smaller than bestFitSize
         else if ((((chunkhead *)cursor)->size) < bestFitSize)
         {
-            DEBUG LOG("cursor size{%i} < bestFitSize{%i}\n",((chunkhead *)cursor)->size,bestFitSize);
-            bestFitPointer=cursor;
-            bestFitSize=((chunkhead *)cursor)->size;
+            DEBUG LOG("cursor size{%i} < bestFitSize{%i}\n", ((chunkhead *)cursor)->size, bestFitSize);
+            bestFitPointer = cursor;
+            bestFitSize = ((chunkhead *)cursor)->size;
 
-            DEBUG LOG("cursor+8+((chunkhead *)cursor)->size{%p}\n",(cursor+(((chunkhead *)cursor)->size)+8));
+            DEBUG LOG("cursor+8+((chunkhead *)cursor)->size{%p}\n", (cursor + (((chunkhead *)cursor)->size) + 8));
         }
         cursor+=8+((chunkhead *)cursor)->size;
         continue;
     }
     DEBUG LOG("\n\nExited Search Loop\n\n");
 
-    if (countError==MEMLENGTH*8) {
+    if (countError == MEMLENGTH * 8) {
         mallocError("countError 5000");
         return NULL;
     }
@@ -255,7 +256,7 @@ void myfree(void *ptr, char *file, int line) {
     if ((char *)ptr<HEAP || (char *)ptr>HEAP+(MEMLENGTH*8))
     {
         mallocError("Free pointer not inside of heap!");
-        return;
+        return NULL;
     }
 
     // search the heap 
