@@ -14,7 +14,7 @@
 #define OBJECTS 64
 #define OBJSIZE (MEMSIZE / OBJECTS - HEADERSIZE)
 
-void *check_objects(char *obj[OBJECTS]) {
+void check_objects(char *obj[OBJECTS]) {
 	int i, j, errors = 0;
 	// check that all objects contain the correct bytes
 	for (i = 0; i < OBJECTS; i++) {
@@ -28,7 +28,7 @@ void *check_objects(char *obj[OBJECTS]) {
 	printf("%d incorrect bytes\n", errors);
 }
 
-void *fill_objects(char *obj[OBJECTS]) {
+void fill_objects(char *obj[OBJECTS]) {
 	int i=0;
 	// fill memory with objects
 	for (i = 0; i < OBJECTS; i++) {
@@ -43,7 +43,7 @@ void *fill_objects(char *obj[OBJECTS]) {
 	check_objects(obj);
 }
 
-void *free_every_other_object(char *obj[OBJECTS]) {
+void free_every_other_object(char *obj[OBJECTS]) {
 	int i=0;
 	// free every other object
 	for (i = 0; i < OBJECTS; i += 2) {
@@ -53,7 +53,7 @@ void *free_every_other_object(char *obj[OBJECTS]) {
 	check_objects(obj);
 }
 
-void *malloc_large_object(char *obj[OBJECTS]) {
+void malloc_large_object(char *obj[OBJECTS]) {
 	int i=0;
 	for (i = 0; i < OBJSIZE; i++) {
 		obj[i] = malloc(MEMSIZE/2);

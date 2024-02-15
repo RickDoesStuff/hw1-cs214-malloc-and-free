@@ -74,8 +74,7 @@ void __mallocError(char* msg, char *file, int line)
     printf("\n\n\n\n\n");
     DEBUG viewHeap();
     printf("%s\n",msg);
-    printf("Error (%s:%i)", file, line);
-    return NULL;
+    printf("Error (%s:%i)\n", file, line);
     //exit(1);
 }
 
@@ -256,7 +255,7 @@ void myfree(void *ptr, char *file, int line) {
     if ((char *)ptr<HEAP || (char *)ptr>HEAP+(MEMLENGTH*8))
     {
         mallocError("Free pointer not inside of heap!");
-        return NULL;
+        return;
     }
 
     // search the heap 
